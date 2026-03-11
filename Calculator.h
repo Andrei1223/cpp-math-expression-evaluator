@@ -2,14 +2,13 @@
 #define CALCULATOR_H
 
 #include "Operatie.h"
-#include "MyVector.h"
-
+#include <vector>
 #include <iostream>
 
 
 class Calculator{
 private:
-    MyVector operatii;
+    vector<Operatie> operatii;
     int dimensiune_operatii;
 
     void construire_vect(char *operatii, double *numere);
@@ -17,7 +16,6 @@ private:
     void sterge_num(double *numere, int poz);
     void parcurgere_operatii(char *operatii, double *numere, int poz_op, int poz_num);
     int prioritate(char operatie);
-    void auxx(int i);
 
     void afisare_vect(); // TODO delete
 
@@ -27,9 +25,6 @@ public:
     Calculator(char *operatii, double *numere);
 
     double calculare();
-
-    friend ostream& operator<<(ostream& out, const Calculator& calc);
-    friend istream& operator>>(istream& in, Calculator& calc);
 };
 
 #endif

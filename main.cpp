@@ -23,6 +23,7 @@ int main()
         if (terminal.get_status()) {
             bool status = true;
             status = string.set_sir_complet(terminal.get_mesaj());
+            //string.afisare_numere();
 
             if (status == false)
                 continue;

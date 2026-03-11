@@ -42,6 +42,7 @@ void Calculator::construire_vect(char *operatii, double *numere)
             prio += 100;
             continue;
         }
+        // TODO sove the problem
 
         if (prioritate(operatii[i]) >= prioritate(operatii[i + 1])) {
             // se adauga o noua operatie in vector
@@ -62,6 +63,7 @@ void Calculator::construire_vect(char *operatii, double *numere)
                 this->operatii.push_back(op);
             }
             else {
+               // cout << operatii[i]<<endl;
                 Operatie op(numere[j], operatii[i], 0, true, false, prioritate(operatii[i]) + prio);
                 this->operatii.push_back(op);
             }
@@ -91,94 +93,92 @@ void Calculator::construire_vect(char *operatii, double *numere)
     }
 }
 
+void Calculator::afisare_vect()
+{
+    for (auto& element : this->operatii) {
+        cout<<"("<<element.get_operator1()<<", "
+            <<element.get_operatie()<< ", "
+            <<element.get_operator2()<<") --> "
+            <<element.get_prioritate()<<" ";
+    }
+    cout <<endl;
+}
+
 double Calculator::calculare()
 {
     // se parcurg operatiile
-    while (operatii.size() > 1) {
-        int i, max_prio = -1000, indice = 0;
-        Operatie op;
-
+    while (operatii.size() != 1) {
+        int i;
         for (i = 0; i < operatii.size() && operatii.size() > 1; i++) {
-            op = operatii.at(i);
+            Operatie op = operatii.at(i);
 
             // se cauta cele cu prioritatea cea mai mare
-            if (op.get_dreapta() == op.get_stanga() && op.get_dreapta() == true && op.get_prioritate() > max_prio) {
-                max_prio = op.get_prioritate();
-                indice = i;
+            if (op.get_dreapta() == op.get_stanga() && op.get_dreapta() == true) {
+                // se executa operatia
+                op.executa_operatie();
+
+                Operatie stanga, dreapta;
+                // TODO for (1+3) * (1+3)
+                if (i == 0) {
+                    dreapta = operatii.at(i + 1);
+                    dreapta.set_operator1(op.get_rezultat());
+                    dreapta.set_stanga(true);
+
+                    // se modifica vectorul
+                    operatii.at(i + 1) = dreapta;
+                }
+                else if (i == operatii.size() - 1) {
+
+                    stanga = operatii.at(i - 1);
+                    stanga.set_operator2(op.get_rezultat());
+
+                    stanga.set_dreapta(true);
+
+                    // se modifica vectorul
+                    operatii.at(i - 1) = stanga;
+                }
+                else {
+                    dreapta = operatii.at(i + 1);
+                    stanga = operatii.at(i - 1);
+
+                    // se verifica prioritatile
+                    if (dreapta.get_prioritate() >= stanga.get_prioritate()) {
+                        dreapta.set_operator1(op.get_rezultat());
+                        dreapta.set_stanga(true);
+
+                        // se face 0 operatorul stang din ecuatia din stanga
+                        Operatie aux = operatii.at(i - 1);
+                        aux.set_operator2(0);
+                        aux.set_stanga(false);
+                        operatii.at(i - 1) = aux;
+
+                        // se modifica vectorul
+                        operatii.at(i + 1) = dreapta;
+                    }
+                    else {
+                        stanga.set_operator2(op.get_rezultat());
+                        stanga.set_dreapta(true);
+
+                        // se face 0 operatorul stang din ecuatia din stanga
+                        Operatie aux = operatii.at(i + 1);
+                        aux.set_operator1(0);
+                        aux.set_stanga(true);
+                        operatii.at(i + 1) = aux;
+
+                        // se modifica vectorul
+                        operatii.at(i - 1) = stanga;
+                    }
+                }
+
+                // se sterge operatia din vector
+                operatii.erase(operatii.begin() + i);
             }
         }
-
-        //cout << indice;
-        i = indice;
-
-        op = operatii.at(i);
-
-        // se executa operatia cu prioritatea cea mai mare
-        op.executa_operatie();
-
-        Operatie stanga, dreapta;
-        // TODO for (1+3) * (1+3)
-        if (i == 0) {
-            dreapta = operatii.at(i + 1);
-            dreapta.set_operator1(op.get_rezultat());
-            dreapta.set_stanga(true);
-
-            // se modifica vectorul
-            operatii.at(i + 1) = dreapta;
-        }
-        else if (i == operatii.size() - 1) {
-
-            stanga = operatii.at(i - 1);
-            stanga.set_operator2(op.get_rezultat());
-
-            stanga.set_dreapta(true);
-
-            // se modifica vectorul
-            operatii.at(i - 1) = stanga;
-        }
-        else {
-            dreapta = operatii.at(i + 1);
-            stanga = operatii.at(i - 1);
-
-            // se verifica prioritatile
-            if (dreapta.get_prioritate() >= stanga.get_prioritate()) {
-                //cout <<"-)- " <<stanga.get_operator1()<<" "<<stanga.get_stanga()<<op.get_rezultat()<<endl;
-
-                dreapta.set_operator1(op.get_rezultat());
-                dreapta.set_stanga(true);
-
-                // se face 0 operatorul stang din ecuatia din stanga
-                Operatie aux = operatii.at(i - 1);
-                aux.set_operator2(0);
-                aux.set_dreapta(false);
-                operatii.at(i - 1) = aux;
-
-                // se modifica vectorul
-                operatii.at(i + 1) = dreapta;
-            }
-            else {
-                stanga.set_operator2(op.get_rezultat());
-                stanga.set_dreapta(true);
-
-                // se face 0 operatorul stang din ecuatia din stanga
-                Operatie aux = operatii.at(i + 1);
-                aux.set_operator1(0);
-                aux.set_stanga(true);
-                operatii.at(i + 1) = aux;
-
-                // se modifica vectorul
-                operatii.at(i - 1) = stanga;
-            }
-        }
-
-        // se sterge operatia din vector
-        operatii.erase(operatii.begin() + i);
-        //afisare_vect();
+       // afisare_vect();
     }
 
     Operatie op = operatii.at(0);
     op.executa_operatie();
-
     return op.get_rezultat();
 }
 
@@ -195,37 +195,10 @@ int Calculator::prioritate(char operatie)
     if (operatie == '^')
         return 5;
     if (operatie == '#')
-        return 5;
-    if (operatie == '[' )
         return 6;
-    if (operatie == '(')
+    if (operatie == '[' )
         return 7;
+    if (operatie == '(')
+        return 8;
     return -1;
-}
-
-ostream& operator<<(ostream& out, const Calculator& calc) {
-
-    out << "Dimensiune operatii: " << calc.dimensiune_operatii << endl;
-    /*out << "Operatii: ";
-    for (int i = 0; i < calc.dimensiune_operatii; ++i) 
-    {
-        out << calc.operatii[i] << " ";
-    }*/
-    out << endl;
-    return out;
-}
-
-istream& operator>>(istream& in, Calculator& calc) {
-    // Introdu date pentru obiectul Calculator
-    cout << "Introduceti dimensiunea operatiilor: ";
-    in >> calc.dimensiune_operatii;
-
-    /*cout << "Introduceti operatiile (unul cate unul): ";
-    for (int i = 0; i < calc.dimensiune_operatii; ++i) {
-        Operatie op;
-        in >> op;
-        calc.operatii.push_back(op);
-    }*/
-
-    return in;
 }

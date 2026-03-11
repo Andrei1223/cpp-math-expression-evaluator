@@ -1,5 +1,5 @@
 #include "MyString.h"
-//#include <stack>
+#include <stack>
 
 // valoarea de inceput a stringului
 #define LEN_STR 100
@@ -19,22 +19,10 @@ MyString::MyString()
 
 MyString::MyString(const MyString& obiect)
 {
-   this->dim_sir_numere = obiect.dim_sir_numere;
+    this->dim_sir_numere = obiect.dim_sir_numere;
     this->dim_sir_semne = obiect.dim_sir_semne;
     this->dim_sir_complet = obiect.dim_sir_complet;
-
-    this->sir_complet = new char[this->dim_sir_complet];
-    strcpy(this->sir_complet, obiect.sir_complet);
-
-    this->sir_semne = new char[this->dim_sir_semne];
-    strcpy(this->sir_semne, obiect.sir_semne);
-
-    this->sir_numere = new double[this->dim_sir_numere];
-    for (unsigned int i = 0; i < this->dim_sir_numere; i++) {
-        this->sir_numere[i] = obiect.sir_numere[i];
-    }
 }
-
 
 // constructor generic
 MyString::~MyString()
@@ -45,34 +33,6 @@ MyString::~MyString()
         delete[]this->sir_numere;
     if(this->sir_semne != nullptr)
         delete[]this->sir_semne;
-}
-
-MyString& MyString::operator=(const MyString& obiect)
-{
-    if (this != &obiect) {
-        // Eliberează resursele existente
-        delete[] this->sir_complet;
-        delete[] this->sir_semne;
-        delete[] this->sir_numere;
-
-        // Copiază resursele din obiectul sursă
-        this->dim_sir_numere = obiect.dim_sir_numere;
-        this->dim_sir_semne = obiect.dim_sir_semne;
-        this->dim_sir_complet = obiect.dim_sir_complet;
-
-        this->sir_complet = new char[this->dim_sir_complet];
-        strcpy(this->sir_complet, obiect.sir_complet);
-
-        this->sir_semne = new char[this->dim_sir_semne];
-        strcpy(this->sir_semne, obiect.sir_semne);
-
-        this->sir_numere = new double[this->dim_sir_numere];
-        for (unsigned int i = 0; i < this->dim_sir_numere; i++) {
-            this->sir_numere[i] = obiect.sir_numere[i];
-        }
-    }
-
-    return *this;
 }
 
 void MyString::schimba_dim(){
@@ -88,21 +48,21 @@ void MyString::schimba_dim(){
     }
 }
 
-void MyString::set_dim_sir_complet(){
+void MyString::schimba_dim_sir_complet(){
     if (this->sir_complet != nullptr)
         delete[]this->sir_complet;
     
     this->sir_complet = new char[this->dim_sir_complet];
 }
 
-void MyString::set_dim_sir_numere(){
+void MyString::schimba_dim_sir_numere(){
     if (this->sir_numere != nullptr)
         delete[]this->sir_numere;
     
     this->sir_numere = new double[this->dim_sir_numere];
 }
 
-void MyString::set_dim_sir_semne(){
+void MyString::schimba_dim_sir_semne(){
     if (this->sir_semne != nullptr)
         delete[]this->sir_semne;
     
@@ -186,7 +146,7 @@ bool MyString::verificare_sintaxa(char *sir)
             return true;
 
         // se verifica operatiile valide
-        
+        // TODO check for edge cases. Add more verifications
 
         // 1) se verifica daca se afla 2 semne unul langa altul
         if (verifica_daca_apare(*previous, "+-*/^#") && verifica_daca_apare(*simbol, "+-*/^#"))
@@ -208,67 +168,67 @@ bool MyString::verificare_sintaxa(char *sir)
 bool MyString::verificare_paranteze(char *sir)
 {
     // se creaza o stiva
-    int stiva[150]; // se considera ca '(' este 1 și '[' este 2
-        int top = 0; // variabilă pentru a urmari varful stivei
-        bool valid = true;
-        int semn;
+    stack<int> stiva;// se considera ca '(' este 1 si '[' este 2
+    bool valid = true;
+    int semn;
 
-        while (*sir && valid) {
-            switch (*sir) {
-                case '(':
-                    if (top < 1000)
-                        stiva[top++] = 1;
-                    else
-                        return false; // Depășirea capacității stivei
-                    break;
-                case '[':
-                    if (top < 1000)
-                        stiva[top++] = 2;
-                    else
-                        return false; // Depășirea capacității stivei
-                    break;
-                case ')':
-                    if (top == 0)
-                        return false;
-                    semn = stiva[--top];
+    while (*sir && valid) {
 
-                    if (semn == 2)
-                        valid = false; // Se iese din while
-                    break;
-                case ']':
-                    if (top == 0)
-                        return false;
-                    semn = stiva[--top];
+        // se verifica daca este o paranteza
+        switch (*sir) {
+            case '(':
+                stiva.push(1);
+                break;
+            case '[':
+                stiva.push(2);
+                break;
+            case ')':
+                if (stiva.empty() == true)
+                    return false;
 
-                    if (semn == 1)
-                        valid = false; // Se iese din while
-                    break;
-                default:
-                    break;
-            }
+                // se verifica ultimul element din stiva
+                semn = stiva.top();
 
-            sir++;
+                if (semn == 2)
+                    valid = false; // se iese din while
+                if (semn == 1)
+                    stiva.pop();
+                break;
+            case ']':
+                if (stiva.empty() == true)
+                    return false;
+                // se verifica ultimul element din stiva
+                semn = stiva.top();
+
+                if(semn == 1)
+                    valid = false; // se iese din while
+                if (semn == 2)
+                    stiva.pop();
+                break;
+            default:
+                break;
         }
 
-        if (top != 0 || valid == false)
-            return false;
+        sir++;
+    }
 
-        return true;
-    
+    if (stiva.empty() == false || valid == false)
+        return false;
+
+    return true;
 }
 
 bool MyString::set_sir_complet(char *sir){
     
     if (verificare_semne(sir) == 1) {
         dim_sir_complet = strlen(sir) + 1;
-        set_dim_sir_complet();
+        schimba_dim_sir_complet();
 
         strcpy(sir_complet, sir);
 
         extragere_numere();
         extragere_semne();
 
-        //afisare_numere();
         // se modifica daca este 3*(-1) sa se transmita -1 in vectorul de numere
         modificare_num_negative();
 
@@ -280,8 +240,8 @@ bool MyString::set_sir_complet(char *sir){
         // se pune pe 0 dimensiunea vectorilor
         this->dim_sir_numere = 0;
         this->dim_sir_semne = 0;
-        set_dim_sir_numere();
-        set_dim_sir_semne();
+        schimba_dim_sir_numere();
+        schimba_dim_sir_semne();
 
         return false;
     }
@@ -304,25 +264,22 @@ void MyString::modificare_num_negative()
             // se modifica dimensiunea
             dim_sir_semne--;
             sir_numere[j] *= (-1);
-            j++;
+
         }
         else if (sir_semne[i] == '-' && i!=0 && sir_semne[i - 1] == '('
-                                     && i!=dim_sir_semne-1 && sir_semne[i + 1] == ')'
-                                     && verificare_cond_minus(numar_minus)) {
-
+                                            && sir_semne[i + 1] == ')'
+                                            && verificare_cond_minus(numar_minus)) {
             strcpy(sir_semne + i - 1, sir_semne + i + 2);
             dim_sir_semne -= 3;
-            //afisare_numere();
-
+            // TODO ded verification for (5-2) it takes as(-2)
+            
             sir_numere[j] *= (-1);
-            j++;
         }// se verifica daca este o paranteza
-
-
-        if (verifica_daca_apare(sir_semne[i], "[()]") == false) {
+        else if (verifica_daca_apare(sir_semne[i], "[()]") == true) {
             j++;
         }
     }
+
 }
 
 bool MyString::verificare_cond_minus(int num_minus)
@@ -372,13 +329,12 @@ void MyString::extragere_numere() {
     char aux[20];
     dim_sir_numere = 0;
 
-    while (pointer_numar != NULL) 
-    { 
+    while (pointer_numar != NULL) { // TODO resolve for edge case -1 at the start of the equation
         pointer_inceput = pointer_numar;
         pointer_final = strpbrk(pointer_inceput + 1, "+-()^/*#[] \n\0");
 
         if (pointer_final == NULL) {
-            pointer_final = pointer_inceput + strlen(pointer_inceput);  
+            pointer_final = pointer_inceput + strlen(pointer_inceput);  // End of the string
         }
 
         if (pointer_final - pointer_inceput < sizeof(aux)) {
@@ -399,8 +355,8 @@ void MyString::extragere_numere() {
 void MyString::afisare_numere()
 {
     int i;
-    for (i = 0; i < dim_sir_numere; i++){
-        cout << sir_numere[i] << " ";
+    for (i = 0; i < dim_sir_semne; i++){
+        cout << sir_semne[i] << " ";
     }
 
     cout << '\n';
@@ -415,46 +371,4 @@ double* MyString::get_sir_numere()
 char* MyString::get_sir_semne()
 {
     return sir_semne;
-}
-
-char* MyString::get_sir_complet()
-{
-    return sir_complet;
-}
-
-unsigned int MyString::get_dim_sir_complet()
-{
-    return dim_sir_complet;
-}
-
-unsigned int MyString::get_dim_sir_semne()
-{
-    return dim_sir_semne;
-}
-
-unsigned int MyString::get_dim_sir_numere()
-{
-    return dim_sir_numere;
-}
-
-ostream& operator<<(ostream& out, const MyString& str) 
-{
-    out << "sir_complet: " << str.sir_complet << endl;
-    out << "sir_semne: " << str.sir_semne << endl;
-    out << "sir_numere: ";
-    for (unsigned int i = 0; i < str.dim_sir_numere; ++i) {
-        out << str.sir_numere[i] << " ";
-    }
-    out << endl;
-    out << "dim_sir_complet: " << str.dim_sir_complet << endl;
-    out << "dim_sir_semne: " << str.dim_sir_semne << endl;
-    out << "dim_sir_numere: " << str.dim_sir_numere << endl;
-    return out;
-}
-
-istream& operator>>(istream& in, MyString& str) 
-{
-    cout << "Introduceti sirul complet: ";
-    in >> str.sir_complet;
-    return in;
 }

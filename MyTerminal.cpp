@@ -7,7 +7,7 @@ MyTerminal::MyTerminal(){
     status = true;
 }
 
-void MyTerminal::set_status(bool status){
+void MyTerminal::schimba_status(bool status){
     this->status = status;
 }
 
@@ -36,20 +36,4 @@ char *MyTerminal::citeste(){
 
 char *MyTerminal::get_mesaj(){
     return mesaj;
-}
-
-ostream& operator<<(ostream& out, const MyTerminal& terminal) 
-{
-    out << "Status: " << (terminal.status ? "Activ" : "Inactiv") << "\nMesaj: " << terminal.mesaj << endl;
-    return out;
-}
-
-istream& operator>>(istream& in, MyTerminal& terminal) 
-{
-    cout << "Introdu statusul (0 pentru Inactiv, 1 pentru Activ): ";
-    in >> terminal.status;
-    cout << "Introdu mesajul: ";
-    in.ignore(); // Ignora caracterul newline ramas in buffer
-    in.getline(terminal.mesaj, sizeof(terminal.mesaj));
-    return in;
 }
